@@ -1,0 +1,120 @@
+openapi: 3.0.3
+info:
+  title: Test Pagination API
+  version: 1.0.0
+
+paths:
+  /api/products:
+    get:
+      summary: Liste paginée des produits
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+          description: Numéro de page (invalide → ramené à 1)
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 10
+          description: Nombre de produits par page (invalide → ramené à 10)
+        - name: category
+          in: query
+          schema:
+            type: string
+            enum: [shoes, clothing, accessories, bags]
+          description: Filtre par catégorie (absent → toutes les catégories)
+        - name: sort
+          in: query
+          schema:
+            type: string
+            enum: [createdAt, price, name]
+            default: createdAt
+          description: Champ de tri (invalide → createdAt)
+        - name: order
+          in: query
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: desc
+          description: Sens du tri (invalide → desc)
+      responses:
+        "200":
+          description: Succès
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Product"
+                  pagination:
+                    $ref: "#/components/schemas/Pagination"
+              example:
+                data:
+                  - _id: "6657a1b2c3d4e5f6a7b8c9d0"
+                    name: "Veltra — Classic Sneakers (Bold)"
+                    description: "Un(e) classic sneakers (cuir pleine fleur). Idéal pour la ville."
+                    price: 89.99
+                    category: shoes
+                    stock: 42
+                    createdAt: "2024-01-15T00:00:00.000Z"
+                pagination:
+                  total: 5000
+                  page: 1
+                  limit: 10
+                  totalPages: 500
+        "500":
+          description: Erreur serveur MongoDB
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+components:
+  schemas:
+    Product:
+      type: object
+      properties:
+        _id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        price:
+          type: number
+        category:
+          type: string
+          enum: [shoes, clothing, accessories, bags]
+        stock:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+
+    Pagination:
+      type: object
+      properties:
+        total:
+          type: integer
+          description: Nombre total de produits correspondant au filtre
+        page:
+          type: integer
+        limit:
+          type: integer
+        totalPages:
+          type: integer
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string

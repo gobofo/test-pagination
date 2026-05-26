@@ -60,3 +60,42 @@ Le reste (outillage, structure des dossiers, librairies UI) est laissé au candi
 - **Design graphique :** libre (sobriété suffisante pour un test).
 - **Modalité d’interaction** (boutons vs scroll infini, etc.) : libre, tant que le chargement reste **incrémental côté serveur**.
 
+---
+
+## 7. Implémentation
+
+### Lancer le projet
+
+```bash
+docker compose up
+```
+
+- Frontend : http://localhost:5173
+- Backend  : http://localhost:3001
+- MongoDB  : localhost:27018 (base `shop`, 5 000 produits seedés au démarrage)
+
+### Stratégie de pagination
+
+Pagination numérotée avec `skip` / `limit` côté MongoDB. Pour 5 000 documents, les performances de `skip()` sont tout à fait acceptables et la stratégie reste simple à comprendre et à maintenir. Une pagination par curseur aurait été plus efficace à très grande échelle mais inutilement complexe ici.
+
+### Backend — `GET /api/products`
+
+| Paramètre  | Défaut     | Comportement si invalide       |
+| ---------- | ---------- | ------------------------------ |
+| `page`     | `1`        | ramené à `1`                   |
+| `limit`    | `10`       | ramené à `10`, max `100`       |
+| `category` | (tous)     | ignoré si hors whitelist       |
+| `sort`     | `createdAt`| ramené à `createdAt`           |
+| `order`    | `desc`     | ramené à `desc`                |
+
+Les paramètres invalides sont silencieusement corrigés plutôt que rejetés (pas de 400), conformément à l’exigence de fiabilité. Le `countDocuments` et le `find` sont exécutés en parallèle via `Promise.all` pour minimiser la latence.
+
+Le contrat complet de l’API est documenté dans [`openapi.yaml`](./openapi.yaml).
+
+### Frontend — React
+
+- Le `useEffect` de fetch se déclenche sur `[page, limit, category, sort, order]`.
+- Un second `useEffect` remet `page` à `1` dès qu’un filtre, un tri ou la taille de page change, pour éviter d’atterrir sur une page inexistante.
+- Un flag `cancelled` gère les race conditions en cas de changements rapides.
+- L’interface expose : filtre par catégorie, tri par date / prix / nom, sens croissant / décroissant, et un sélecteur de taille de page (10 / 25 / 50).
+
