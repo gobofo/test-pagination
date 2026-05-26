@@ -39,7 +39,7 @@ export default function App() {
   const [error,      setError]      = useState(null);
 
   const [page,     setPage]     = useState(1);
-  const [limit,    setLimit]    = useState(20);
+  const [limit,    setLimit]    = useState(10);
   const [category, setCategory] = useState("");
   const [sort,     setSort]     = useState("createdAt");
   const [order,    setOrder]    = useState("desc");
