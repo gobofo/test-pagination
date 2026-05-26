@@ -39,14 +39,14 @@ export default function App() {
   const [error,      setError]      = useState(null);
 
   const [page,     setPage]     = useState(1);
-  const [limit]                 = useState(20);
+  const [limit,    setLimit]    = useState(20);
   const [category, setCategory] = useState("");
   const [sort,     setSort]     = useState("createdAt");
   const [order,    setOrder]    = useState("desc");
 
   useEffect(() => {
     setPage(1);
-  }, [category, sort, order]);
+  }, [category, sort, order, limit]);
 
   useEffect(() => {
     let cancelled = false;
@@ -93,6 +93,11 @@ export default function App() {
           <select value={order} onChange={(e) => setOrder(e.target.value)}>
             <option value="asc">Croissant</option>
             <option value="desc">Decroissant</option>
+          </select>
+          <select value={limit} onChange={(e) => setLimit(Number(e.target.value))}>
+            <option value={10}>10 / page</option>
+            <option value={25}>25 / page</option>
+            <option value={50}>50 / page</option>
           </select>
         </div>
       </div>
