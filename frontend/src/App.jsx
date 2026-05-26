@@ -75,9 +75,16 @@ export default function App() {
 
   return (
     <div className="app">
-      <div className="header">
-        <h1>Catalogue produits</h1>
-        <div className="filters">
+      <header className="header">
+        <div className="header-title">
+          <h1>Catalogue</h1>
+          {pagination && (
+            <span className="header-meta">
+              {pagination.total.toLocaleString()} references
+            </span>
+          )}
+        </div>
+        <div className="controls">
           <select value={category} onChange={(e) => setCategory(e.target.value)}>
             <option value="">Toutes categories</option>
             <option value="shoes">Chaussures</option>
@@ -100,49 +107,77 @@ export default function App() {
             <option value={50}>50 / page</option>
           </select>
         </div>
-      </div>
+      </header>
 
-      {loading && <p className="loading">Chargement...</p>}
-      {error   && <p className="error">Erreur : {error}</p>}
+      <div className="divider" />
+
+      {loading && (
+        <div className="state-container">
+          <div className="loader" />
+        </div>
+      )}
+
+      {error && (
+        <div className="state-container">
+          <p className="state-error">Erreur : {error}</p>
+        </div>
+      )}
 
       {!loading && !error && (
         <>
           {products.length === 0 ? (
-            <p className="empty">Aucun produit trouve.</p>
+            <div className="state-container">
+              <p className="state-empty">Aucun produit trouve.</p>
+            </div>
           ) : (
             <div className="product-grid">
-              {products.map((product) => (
-                <div key={product._id} className="product-card">
-                  <span className="category">{product.category}</span>
-                  <h2>{product.name}</h2>
-                  <p className="description">{product.description}</p>
+              {products.map((product, index) => (
+                <article
+                  key={product._id}
+                  className="product-card"
+                  style={{ animationDelay: `${index * 22}ms` }}
+                >
+                  <span className="card-category">{product.category}</span>
+                  <h2 className="card-name">{product.name}</h2>
+                  <p className="card-description">{product.description}</p>
                   <div className="card-footer">
-                    <span className="price">{product.price.toFixed(2)} EUR</span>
-                    <span className="stock">{product.stock} en stock</span>
+                    <span className="card-price">
+                      {product.price.toFixed(2)}<small> EUR</small>
+                    </span>
+                    <span className="card-stock">{product.stock} en stock</span>
                   </div>
-                </div>
+                </article>
               ))}
             </div>
           )}
-          {pagination && (
-            <div className="pagination">
+
+          {pagination && pagination.totalPages > 1 && (
+            <nav className="pagination">
               <button
+                className="page-btn"
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                 disabled={page <= 1}
+                aria-label="Page precedente"
               >
-                Precedent
+                {'←'}
               </button>
-              <span className="page-info">
-                Page {pagination.page} / {pagination.totalPages}
-                &nbsp;({pagination.total} resultats)
-              </span>
+              <div className="page-info">
+                <span className="page-current">{pagination.page}</span>
+                <span className="page-sep">/</span>
+                <span className="page-total">{pagination.totalPages}</span>
+                <span className="page-count">
+                  {pagination.total.toLocaleString()} resultats
+                </span>
+              </div>
               <button
+                className="page-btn"
                 onClick={() => setPage((p) => Math.min(pagination.totalPages, p + 1))}
                 disabled={page >= pagination.totalPages}
+                aria-label="Page suivante"
               >
-                Suivant
+                {'→'}
               </button>
-            </div>
+            </nav>
           )}
         </>
       )}
