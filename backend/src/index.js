@@ -19,7 +19,7 @@ const ALLOWED_CATEGORIES  = ["shoes", "clothing", "accessories", "bags"];
  */
 function parseParams(query) {
   const page     = Math.max(1, parseInt(query.page,  10) || 1);
-  const limit    = Math.min(100, Math.max(1, parseInt(query.limit, 10) || 10));
+  const limit    = Math.min(100, Math.max(1, parseInt(query.limit, 10) || 20));
   const category = ALLOWED_CATEGORIES.includes(query.category) ? query.category : null;
   const sort     = ALLOWED_SORT_FIELDS.includes(query.sort) ? query.sort : "createdAt";
   const order    = query.order === "asc" ? 1 : -1;
